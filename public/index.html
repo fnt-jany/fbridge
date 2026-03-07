@@ -1,0 +1,62 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FBridge</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>FBridge</h1>
+    <div class="header-actions">
+      <div id="rootPath"></div>
+      <button id="toggleTreeBtn" type="button">폴더 숨기기</button>
+    </div>
+  </header>
+  <main>
+    <aside id="treePane">
+      <div class="pane-title">Files</div>
+      <div id="fileTree"></div>
+    </aside>
+    <section id="editorPane">
+      <div class="toolbar">
+        <span id="currentFile">선택된 파일 없음</span><span id="currentFileMeta"></span>
+        <div class="toolbar-actions">
+          <button id="editBtn" hidden>편집</button>
+          <button id="closeEditorBtn" hidden>닫기</button>
+          <button id="saveBtn" disabled>저장</button>
+          <span id="saveMessage"></span>
+        </div>
+      </div>
+
+      <div id="infoPanel">
+        <h2>파일 미리보기</h2>
+        <div class="info-row"><span>경로</span><strong id="infoPath">-</strong></div>
+        <div class="info-row"><span>형식</span><strong id="infoType">-</strong></div>
+        <div class="info-row"><span>MIME</span><strong id="infoMime">-</strong></div>
+        <div class="info-row"><span>크기</span><strong id="infoSize">-</strong></div>
+        <div class="info-row"><span>편집 가능</span><strong id="infoEditable">-</strong></div>
+
+        <div id="previewContainer">
+          <img id="previewImage" hidden alt="image preview" />
+          <video id="previewVideo" hidden controls></video>
+          <div id="previewText">미리보기 지원 형식이 아닙니다.</div>
+        </div>
+      </div>
+
+      <div id="editorWrap" hidden>
+        <div id="lineNumbers"></div>
+        <textarea id="editor" placeholder="편집 버튼을 누르면 에디터가 열립니다." disabled></textarea>
+      </div>
+
+      <div id="statusBar">
+        <span id="status">준비됨</span>
+        <span id="statusMeta">Ln 1, Col 1</span>
+      </div>
+    </section>
+  </main>
+  <script src="/app.js?v=20260307m"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+﻿:root {
+  --bg1: #f0f4ff;
+  --bg2: #dce7ff;
+  --card: #ffffff;
+  --text: #1e2a44;
+  --muted: #6b7894;
+  --accent: #1f63ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: radial-gradient(circle at 20% 20%, var(--bg1), var(--bg2));
+  color: var(--text);
+}
+
+.login-wrap {
+  width: min(420px, 92vw);
+}
+
+.login-card {
+  background: var(--card);
+  border: 1px solid #d9e0f3;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(32, 55, 120, 0.16);
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+
+.desc {
+  margin: 0 0 14px;
+  color: var(--muted);
+}
+
+input,
+button {
+  width: 100%;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+input {
+  border: 1px solid #ccd6ef;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+button {
+  border: 0;
+  padding: 10px 12px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#message {
+  min-height: 20px;
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+#message.error {
+  color: #bc2a2a;
+}
+
+#message.success {
+  color: #207b41;
+}
