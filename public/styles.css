@@ -260,15 +260,14 @@ button:disabled {
   font-size: 14px;
   line-height: 22px;
   white-space: pre;
-  overflow: auto;
+  overflow: hidden;
   user-select: none;
-  scrollbar-width: none;
 }
 
-#lineNumbers::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+#lineNumbersInner {
+  will-change: transform;
 }
+
 
 #editor {
   flex: 1;
@@ -322,14 +321,6 @@ button:disabled {
     padding-right: 16px;
   }
 
-  #lineNumbers {
-    display: block;
-    flex-basis: 36px;
-    width: 36px;
-    padding: 12px 4px;
-    font-size: 11px;
-  }
-
   #editor {
     padding: 12px 16px 12px 12px;
     font-size: 13px;
@@ -341,25 +332,16 @@ button:disabled {
     height: 100vh;
   }
 }
+
 body.touch-device .toolbar,
-body.touch-device #infoPanel,
-body.touch-device #statusBar {
-  padding-right: 16px;
+body.touch-device #statusBar,
+body.touch-device .toolbar-actions,
+body.touch-device #currentFile,
+body.touch-device #currentFileMeta,
+body.touch-device #status,
+body.touch-device #statusMeta {
+  min-width: 0;
 }
-
-body.touch-device #lineNumbers {
-  display: block;
-  flex-basis: 36px;
-  width: 36px;
-  padding: 12px 4px;
-  font-size: 11px;
-}
-
-body.touch-device #editor {
-  padding: 12px 20px 12px 12px;
-  font-size: 13px;
-}
-
 
 body.touch-device .toolbar {
   flex-wrap: wrap;
@@ -381,13 +363,29 @@ body.touch-device #saveMessage {
   display: none;
 }
 
+body.touch-device #currentFile,
+body.touch-device #currentFileMeta,
+body.touch-device #status,
 body.touch-device #statusMeta {
-  max-width: 45vw;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.touch-device #statusMeta {
+  max-width: 40vw;
 }
 
 body.touch-device #statusBar {
   font-size: 12px;
+  padding-right: 16px;
 }
 
+body.touch-device #infoPanel {
+  padding-right: 16px;
+}
+
+body.touch-device #editor {
+  padding: 12px 20px 12px 12px;
+  font-size: 13px;
+}

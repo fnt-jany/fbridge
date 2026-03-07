@@ -1,6 +1,7 @@
 ﻿const fileTreeEl = document.getElementById('fileTree');
 const editorWrapEl = document.getElementById('editorWrap');
 const lineNumbersEl = document.getElementById('lineNumbers');
+const lineNumbersInnerEl = document.getElementById('lineNumbersInner');
 const editorEl = document.getElementById('editor');
 const editBtn = document.getElementById('editBtn');
 const closeEditorBtn = document.getElementById('closeEditorBtn');
@@ -25,6 +26,8 @@ const previewTextEl = document.getElementById('previewText');
 let currentFilePath = null;
 let currentFileEditable = false;
 let activeNode = null;
+let lineNumberSyncFrame = null;
+let lastLineNumberScrollTop = -1;
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
@@ -42,11 +45,39 @@ function updateLineNumbers() {
   for (let i = 1; i <= lines; i += 1) {
     text += i + '\n';
   }
-  lineNumbersEl.textContent = text || '1\n';
+  lineNumbersInnerEl.textContent = text || '1\n';
 }
 
 function syncLineNumberScroll() {
-  lineNumbersEl.scrollTop = editorEl.scrollTop;
+  const scrollTop = editorEl.scrollTop;
+  if (scrollTop === lastLineNumberScrollTop) return;
+  lastLineNumberScrollTop = scrollTop;
+  lineNumbersInnerEl.style.transform = 'translateY(-' + scrollTop + 'px)';
+}
+
+function startLineNumberSyncLoop() {
+  if (lineNumberSyncFrame !== null) return;
+
+  const tick = () => {
+    if (editorWrapEl.style.display !== 'flex') {
+      lineNumberSyncFrame = null;
+      lastLineNumberScrollTop = -1;
+      return;
+    }
+
+    syncLineNumberScroll();
+    lineNumberSyncFrame = requestAnimationFrame(tick);
+  };
+
+  lineNumberSyncFrame = requestAnimationFrame(tick);
+}
+
+function stopLineNumberSyncLoop() {
+  if (lineNumberSyncFrame !== null) {
+    cancelAnimationFrame(lineNumberSyncFrame);
+    lineNumberSyncFrame = null;
+  }
+  lastLineNumberScrollTop = -1;
 }
 
 function updateStatusMeta() {
@@ -87,6 +118,7 @@ function formatBytes(size) {
 }
 
 function showInfoPanel() {
+  stopLineNumberSyncLoop();
   infoPanelEl.style.display = 'flex';
   editorWrapEl.style.display = 'none';
   editorEl.disabled = true;
@@ -102,6 +134,7 @@ function showEditor(readOnlyMode = true) {
   editorEl.readOnly = readOnlyMode;
   saveBtn.disabled = readOnlyMode;
   closeEditorBtn.hidden = readOnlyMode;
+  startLineNumberSyncLoop();
   updateStatusMeta();
 }
 
@@ -324,6 +357,12 @@ editorEl.addEventListener('input', () => {
 editorEl.addEventListener('scroll', syncLineNumberScroll);
 editorEl.addEventListener('click', updateStatusMeta);
 editorEl.addEventListener('keyup', updateStatusMeta);
+lineNumbersEl.addEventListener('wheel', (event) => {
+  event.preventDefault();
+  editorEl.scrollTop += event.deltaY;
+  syncLineNumberScroll();
+}, { passive: false });
+
 
 loadRoot();
 showInfoPanel();
@@ -347,4 +386,8 @@ updateTreeToggleLabel();
 if (window.matchMedia('(pointer: coarse)').matches) {
   document.body.classList.add('touch-device');
 }
+
+
+
+
 
