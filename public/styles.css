@@ -44,6 +44,7 @@ header {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 h1 {
@@ -52,8 +53,12 @@ h1 {
 }
 
 #rootPath {
+  min-width: 0;
   color: var(--muted);
   font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 main {
@@ -133,7 +138,8 @@ body.tree-collapsed #treePane {
   gap: 8px;
 }
 
-#toggleTreeBtn {
+#toggleTreeBtn,
+#logoutBtn {
   padding: 6px 10px;
   font-size: 12px;
 }

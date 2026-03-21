@@ -31,6 +31,7 @@ body {
   border-radius: 14px;
   padding: 24px;
   box-shadow: 0 12px 30px rgba(32, 55, 120, 0.16);
+  overflow: hidden;
 }
 
 h1 {
@@ -39,39 +40,26 @@ h1 {
 }
 
 .desc {
-  margin: 0 0 14px;
+  margin: 0 0 8px;
   color: var(--muted);
 }
 
-input,
-button {
+.hint {
+  margin: 0 0 16px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+#googleButton {
+  min-height: 44px;
   width: 100%;
-  border-radius: 8px;
-  font-size: 15px;
-}
-
-input {
-  border: 1px solid #ccd6ef;
-  padding: 10px 12px;
-  margin-bottom: 10px;
-}
-
-button {
-  border: 0;
-  padding: 10px 12px;
-  background: var(--accent);
-  color: #fff;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 #message {
   min-height: 20px;
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   font-size: 14px;
   color: var(--muted);
 }

@@ -11,6 +11,7 @@ const currentFileEl = document.getElementById('currentFile');
 const currentFileMetaEl = document.getElementById('currentFileMeta');
 const rootPathEl = document.getElementById('rootPath');
 const toggleTreeBtn = document.getElementById('toggleTreeBtn');
+const logoutBtn = document.getElementById('logoutBtn');
 const statusEl = document.getElementById('status');
 const statusMetaEl = document.getElementById('statusMeta');
 const infoPanelEl = document.getElementById('infoPanel');
@@ -209,6 +210,17 @@ async function saveFile(path, content) {
   return res.json();
 }
 
+async function logout() {
+  const res = await fetch('/logout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (!res.ok) {
+    throw new Error('로그아웃 실패');
+  }
+}
+
 function buildNode(item, basePath) {
   const fullPath = basePath ? `${basePath}/${item.name}` : item.name;
   const wrapper = document.createElement('div');
@@ -375,6 +387,19 @@ currentFileMetaEl.textContent = '';
 toggleTreeBtn.addEventListener('click', () => {
   document.body.classList.toggle('tree-collapsed');
   updateTreeToggleLabel();
+});
+
+logoutBtn.addEventListener('click', async () => {
+  logoutBtn.disabled = true;
+  setStatus('로그아웃 중...');
+
+  try {
+    await logout();
+    window.location.href = '/login';
+  } catch (err) {
+    logoutBtn.disabled = false;
+    setStatus(err.message, true);
+  }
 });
 
 if (window.matchMedia('(max-width: 900px)').matches) {

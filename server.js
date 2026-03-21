@@ -1,20 +1,24 @@
 ﻿require('dotenv').config();
 
 const express = require('express');
+const fsSync = require('fs');
 const fs = require('fs/promises');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const crypto = require('crypto');
+const { OAuth2Client } = require('google-auth-library');
 
 const app = express();
 const PORT = 3006;
 const ROOT_DIR = path.resolve(process.env.EDITOR_ROOT || 'C:/Project');
 const START_PATH = String(process.env.START_PATH || '').trim();
-const APP_PASSWORD = process.env.APP_PASSWORD || '3437';
 const SESSION_COOKIE = 'auth_token';
+const DAY4_ENV_PATH = 'C:/Project/day4/apps/api/.env';
+const ALLOWED_GOOGLE_EMAILS = String(process.env.ALLOWED_GOOGLE_EMAILS || process.env.ALLOWED_GOOGLE_EMAIL || '')
+  .split(',')
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean);
 const sessions = new Set();
-const failedByIp = new Map();
-const blockedIps = new Set();
 
 const EDITABLE_EXTENSIONS = new Set([
   '.txt', '.md', '.json', '.js', '.ts', '.tsx', '.jsx', '.html', '.css', '.scss', '.xml', '.yml', '.yaml',
@@ -47,6 +51,19 @@ const MIME_BY_EXTENSION = {
   '.zip': 'application/zip'
 };
 
+function readDay4GoogleClientId() {
+  try {
+    const envFile = fsSync.readFileSync(DAY4_ENV_PATH, 'utf8');
+    const match = envFile.match(/^GOOGLE_CLIENT_ID=(.+)$/m);
+    return match ? match[1].trim() : '';
+  } catch {
+    return '';
+  }
+}
+
+const googleClientId = readDay4GoogleClientId();
+const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
+
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 app.use((req, res, next) => {
@@ -55,14 +72,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-function getClientIp(req) {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string' && forwarded.length > 0) {
-    return forwarded.split(',')[0].trim();
-  }
-  return req.socket.remoteAddress || 'unknown';
-}
 
 function isAuthed(req) {
   const token = req.cookies?.[SESSION_COOKIE];
@@ -88,10 +97,19 @@ function resolveSafePath(relativePath = '') {
   return resolved;
 }
 
+function getFileExtension(filePath) {
+  const baseName = path.basename(filePath).toLowerCase();
+  const extension = path.extname(baseName).toLowerCase();
+  if (extension) return extension;
+  if (baseName.startsWith('.') && baseName.indexOf('.', 1) === -1) {
+    return baseName;
+  }
+  return '';
+}
+
 async function listDirectory(absPath) {
   const entries = await fs.readdir(absPath, { withFileTypes: true });
   return entries
-    .filter((entry) => !entry.name.startsWith('.'))
     .map((entry) => ({
       name: entry.name,
       type: entry.isDirectory() ? 'directory' : 'file',
@@ -121,16 +139,42 @@ app.get('/favicon.svg', (req, res) => {
   return res.sendFile(path.join(__dirname, 'public', 'favicon.svg'));
 });
 
-app.post('/login', (req, res) => {
-  const ip = getClientIp(req);
-  const { password } = req.body || {};
-
-  if (blockedIps.has(ip)) {
-    return res.status(403).json({ error: '3회 실패로 접근이 차단되었습니다.' });
+app.get('/auth/google-config', (req, res) => {
+  if (!googleClientId) {
+    return res.status(500).json({ error: 'day4 Google client ID를 찾을 수 없습니다.' });
   }
 
-  if (String(password || '') === APP_PASSWORD) {
-    failedByIp.delete(ip);
+  return res.json({ clientId: googleClientId });
+});
+
+app.post('/auth/google', async (req, res) => {
+  try {
+    if (!googleClient || !googleClientId) {
+      return res.status(500).json({ error: 'Google 로그인 설정이 없습니다.' });
+    }
+
+    const credential = String(req.body?.credential || '');
+    if (!credential) {
+      return res.status(400).json({ error: 'Google 인증 정보가 없습니다.' });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: googleClientId,
+    });
+
+    const payload = ticket.getPayload();
+    const email = String(payload?.email || '').toLowerCase();
+    const emailVerified = Boolean(payload?.email_verified);
+
+    if (!emailVerified) {
+      return res.status(403).json({ error: 'Google 이메일 인증이 필요합니다.' });
+    }
+
+    if (!ALLOWED_GOOGLE_EMAILS.includes(email)) {
+      return res.status(403).json({ error: '승인되지 않은 Google 계정입니다.' });
+    }
+
     const token = crypto.randomUUID();
     sessions.add(token);
     res.cookie(SESSION_COOKIE, token, {
@@ -139,17 +183,11 @@ app.post('/login', (req, res) => {
       secure: false,
       maxAge: 1000 * 60 * 60 * 8,
     });
-    return res.json({ ok: true });
-  }
 
-  const count = (failedByIp.get(ip) || 0) + 1;
-  failedByIp.set(ip, count);
-  if (count >= 3) {
-    blockedIps.add(ip);
-    return res.status(403).json({ error: '3회 실패로 접근이 차단되었습니다.' });
+    return res.json({ ok: true, email });
+  } catch {
+    return res.status(401).json({ error: 'Google 로그인 검증에 실패했습니다.' });
   }
-
-  return res.status(401).json({ error: `비밀번호 오류 (${count}/3)` });
 });
 
 app.post('/logout', authRequired, (req, res) => {
@@ -206,7 +244,7 @@ app.get('/api/file-info', authRequired, async (req, res) => {
       return res.status(400).json({ error: 'Not a file' });
     }
 
-    const extension = path.extname(absPath).toLowerCase();
+    const extension = getFileExtension(absPath);
     const editable = EDITABLE_EXTENSIONS.has(extension);
     const mimeType = MIME_BY_EXTENSION[extension] || 'application/octet-stream';
 
@@ -255,7 +293,7 @@ app.get('/api/file', authRequired, async (req, res) => {
       return res.status(400).json({ error: 'Not a file' });
     }
 
-    const extension = path.extname(absPath).toLowerCase();
+    const extension = getFileExtension(absPath);
     if (!EDITABLE_EXTENSIONS.has(extension)) {
       return res.status(400).json({ error: '이 파일 형식은 편집할 수 없습니다.' });
     }
@@ -275,7 +313,7 @@ app.post('/api/file', authRequired, async (req, res) => {
     }
 
     const absPath = resolveSafePath(relPath);
-    const extension = path.extname(absPath).toLowerCase();
+    const extension = getFileExtension(absPath);
     if (!EDITABLE_EXTENSIONS.has(extension)) {
       return res.status(400).json({ error: '이 파일 형식은 편집할 수 없습니다.' });
     }
@@ -291,10 +329,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`FBridge running on http://0.0.0.0:${PORT}`);
   console.log(`Editing root: ${ROOT_DIR}`);
   console.log(`Start path: ${START_PATH || '(root)'}`);
+  console.log(`Google login client loaded: ${googleClientId ? 'yes' : 'no'}`);
+  console.log(`Allowed Google emails configured: ${ALLOWED_GOOGLE_EMAILS.length}`);
 });
-
-
-
-
-
 
