@@ -68,6 +68,7 @@ main {
 }
 
 #treePane {
+  flex: 0 0 320px;
   width: 320px;
   border-right: 1px solid var(--border);
   background: var(--panel);
@@ -76,11 +77,34 @@ main {
 }
 
 body.tree-collapsed #treePane {
+  flex: 0 0 0;
   width: 0;
   min-width: 0;
   padding: 0;
   border-right: 0;
   overflow: hidden;
+}
+
+#splitHandle {
+  flex: 0 0 8px;
+  width: 8px;
+  cursor: col-resize;
+  background: linear-gradient(90deg, transparent 0, transparent 3px, #d8dce7 3px, #d8dce7 5px, transparent 5px, transparent 100%);
+  touch-action: none;
+}
+
+#splitHandle:hover {
+  background: linear-gradient(90deg, transparent 0, transparent 3px, #1662ff 3px, #1662ff 5px, transparent 5px, transparent 100%);
+}
+
+body.tree-collapsed #splitHandle {
+  display: none;
+}
+
+body.is-resizing,
+body.is-resizing * {
+  cursor: col-resize !important;
+  user-select: none;
 }
 
 #editorPane {
@@ -95,6 +119,37 @@ body.tree-collapsed #treePane {
 .pane-title {
   font-weight: 600;
   margin-bottom: 8px;
+}
+
+.tree-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+#treeCurrentPath {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f8faff;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree-actions {
+  display: flex;
+  gap: 8px;
+}
+
+#parentFolderBtn,
+#openPathBtn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 12px;
 }
 
 .node {

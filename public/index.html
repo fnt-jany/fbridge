@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -12,53 +12,62 @@
     <h1>FBridge</h1>
     <div class="header-actions">
       <div id="rootPath"></div>
-      <button id="toggleTreeBtn" type="button">폴더 숨기기</button>
-      <button id="logoutBtn" type="button">로그아웃</button>
+      <button id="toggleTreeBtn" type="button">&#xD3F4;&#xB354; &#xC228;&#xAE30;&#xAE30;</button>
+      <button id="logoutBtn" type="button">&#xB85C;&#xADF8;&#xC544;&#xC6C3;</button>
     </div>
   </header>
   <main>
     <aside id="treePane">
       <div class="pane-title">Files</div>
+      <div class="tree-controls">
+        <div id="treeCurrentPath">/</div>
+        <div class="tree-actions">
+          <button id="parentFolderBtn" type="button">&#xC0C1;&#xC704; &#xD3F4;&#xB354;</button>
+          <button id="openPathBtn" type="button">&#xACBD;&#xB85C; &#xC5F4;&#xAE30;</button>
+        </div>
+      </div>
       <div id="fileTree"></div>
     </aside>
+    <div id="splitHandle" aria-label="tree resize handle" role="separator"></div>
     <section id="editorPane">
       <div class="toolbar">
-        <span id="currentFile">선택된 파일 없음</span><span id="currentFileMeta"></span>
+        <span id="currentFile">&#xC120;&#xD0DD;&#xB41C; &#xD30C;&#xC77C; &#xC5C6;&#xC74C;</span><span id="currentFileMeta"></span>
         <div class="toolbar-actions">
-          <button id="editBtn" hidden>편집</button>
-          <button id="closeEditorBtn" hidden>닫기</button>
-          <button id="saveBtn" disabled>저장</button>
+          <button id="editBtn" hidden>&#xD3B8;&#xC9D1;</button>
+          <button id="closeEditorBtn" hidden>&#xB2EB;&#xAE30;</button>
+          <button id="saveBtn" disabled>&#xC800;&#xC7A5;</button>
+          <button id="downloadBtn" hidden>&#xB2E4;&#xC6B4;&#xB85C;&#xB4DC;</button>
+          <button id="deleteBtn" hidden>&#xC0AD;&#xC81C;</button>
           <span id="saveMessage"></span>
         </div>
       </div>
 
       <div id="infoPanel">
-        <h2>파일 미리보기</h2>
-        <div class="info-row"><span>경로</span><strong id="infoPath">-</strong></div>
-        <div class="info-row"><span>형식</span><strong id="infoType">-</strong></div>
+        <h2>&#xD30C;&#xC77C; &#xBBF8;&#xB9AC;&#xBCF4;&#xAE30;</h2>
+        <div class="info-row"><span>&#xACBD;&#xB85C;</span><strong id="infoPath">-</strong></div>
+        <div class="info-row"><span>&#xD615;&#xC2DD;</span><strong id="infoType">-</strong></div>
         <div class="info-row"><span>MIME</span><strong id="infoMime">-</strong></div>
-        <div class="info-row"><span>크기</span><strong id="infoSize">-</strong></div>
-        <div class="info-row"><span>편집 가능</span><strong id="infoEditable">-</strong></div>
+        <div class="info-row"><span>&#xD06C;&#xAE30;</span><strong id="infoSize">-</strong></div>
+        <div class="info-row"><span>&#xD3B8;&#xC9D1; &#xAC00;&#xB2A5;</span><strong id="infoEditable">-</strong></div>
 
         <div id="previewContainer">
           <img id="previewImage" hidden alt="image preview" />
           <video id="previewVideo" hidden controls></video>
-          <div id="previewText">미리보기 지원 형식이 아닙니다.</div>
+          <div id="previewText">&#xBBF8;&#xB9AC;&#xBCF4;&#xAE30; &#xC9C0;&#xC6D0; &#xD615;&#xC2DD;&#xC774; &#xC544;&#xB2D9;&#xB2C8;&#xB2E4;.</div>
         </div>
       </div>
 
       <div id="editorWrap" hidden>
         <div id="lineNumbers"><div id="lineNumbersInner"></div></div>
-        <textarea id="editor" placeholder="편집 버튼을 누르면 에디터가 열립니다." disabled></textarea>
+        <textarea id="editor" placeholder="&#xD3B8;&#xC9D1; &#xBC84;&#xD2BC;&#xC744; &#xB204;&#xB974;&#xBA74; &#xC5D0;&#xB514;&#xD130;&#xAC00; &#xC5F4;&#xB9BD;&#xB2C8;&#xB2E4;." disabled></textarea>
       </div>
 
       <div id="statusBar">
-        <span id="status">준비됨</span>
+        <span id="status">&#xC900;&#xBE44;&#xB428;</span>
         <span id="statusMeta">Ln 1, Col 1</span>
       </div>
     </section>
   </main>
-  <script src="/app.js?v=20260308a"></script>
+  <script src="/app.js?v=20260328b"></script>
 </body>
 </html>
-

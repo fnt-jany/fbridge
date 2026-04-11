@@ -70,6 +70,15 @@ app.use((req, res, next) => {
   if (req.path === '/' || req.path.endsWith('.js') || req.path.endsWith('.css') || req.path.endsWith('.html')) {
     res.set('Cache-Control', 'no-store');
   }
+
+  if (req.path === '/' || req.path === '/login' || req.path.endsWith('.html')) {
+    res.type('text/html; charset=utf-8');
+  } else if (req.path.endsWith('.js')) {
+    res.type('application/javascript; charset=utf-8');
+  } else if (req.path.endsWith('.css')) {
+    res.type('text/css; charset=utf-8');
+  }
+
   next();
 });
 
@@ -280,6 +289,28 @@ app.get('/api/raw', authRequired, async (req, res) => {
   }
 });
 
+app.get('/api/download', authRequired, async (req, res) => {
+  try {
+    const relPath = req.query.path;
+    if (!relPath) {
+      return res.status(400).json({ error: 'Path is required' });
+    }
+
+    const absPath = resolveSafePath(relPath);
+    const stats = await fs.stat(absPath);
+    if (!stats.isFile()) {
+      return res.status(400).json({ error: 'Not a file' });
+    }
+
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Length', stats.size);
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(path.basename(absPath))}"`);
+    return fsSync.createReadStream(absPath).pipe(res);
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+});
+
 app.get('/api/file', authRequired, async (req, res) => {
   try {
     const relPath = req.query.path;
@@ -302,6 +333,26 @@ app.get('/api/file', authRequired, async (req, res) => {
     res.json({ path: relPath, content });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+app.delete('/api/file', authRequired, async (req, res) => {
+  try {
+    const relPath = req.query.path;
+    if (!relPath) {
+      return res.status(400).json({ error: 'Path is required' });
+    }
+
+    const absPath = resolveSafePath(relPath);
+    const stats = await fs.stat(absPath);
+    if (!stats.isFile()) {
+      return res.status(400).json({ error: 'Not a file' });
+    }
+
+    await fs.unlink(absPath);
+    return res.json({ ok: true, path: relPath });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
   }
 });
 
