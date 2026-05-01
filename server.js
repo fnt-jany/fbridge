@@ -13,7 +13,6 @@ const PORT = 3006;
 const ROOT_DIR = path.resolve(process.env.EDITOR_ROOT || 'C:/Project');
 const START_PATH = String(process.env.START_PATH || '').trim();
 const SESSION_COOKIE = 'auth_token';
-const DAY4_ENV_PATH = 'C:/Project/day4/apps/api/.env';
 const ALLOWED_GOOGLE_EMAILS = String(process.env.ALLOWED_GOOGLE_EMAILS || process.env.ALLOWED_GOOGLE_EMAIL || '')
   .split(',')
   .map((email) => email.trim().toLowerCase())
@@ -51,17 +50,7 @@ const MIME_BY_EXTENSION = {
   '.zip': 'application/zip'
 };
 
-function readDay4GoogleClientId() {
-  try {
-    const envFile = fsSync.readFileSync(DAY4_ENV_PATH, 'utf8');
-    const match = envFile.match(/^GOOGLE_CLIENT_ID=(.+)$/m);
-    return match ? match[1].trim() : '';
-  } catch {
-    return '';
-  }
-}
-
-const googleClientId = readDay4GoogleClientId();
+const googleClientId = String(process.env.GOOGLE_CLIENT_ID || '').trim();
 const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
 
 app.use(express.json({ limit: '10mb' }));
@@ -150,7 +139,7 @@ app.get('/favicon.svg', (req, res) => {
 
 app.get('/auth/google-config', (req, res) => {
   if (!googleClientId) {
-    return res.status(500).json({ error: 'day4 Google client ID를 찾을 수 없습니다.' });
+      return res.status(500).json({ error: 'Google client ID를 찾을 수 없습니다.' });
   }
 
   return res.json({ clientId: googleClientId });
